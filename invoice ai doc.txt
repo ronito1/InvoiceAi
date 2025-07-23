@@ -1,0 +1,67 @@
+InvoiceAI - Project Documentation
+Version: 1.0
+Date: July 23, 2025
+
+1. Overview
+InvoiceAI is a modern, responsive web application designed for intelligent invoice processing. It allows users to upload an image of an invoice and uses a powerful Large Language Model (LLM) to automatically extract key information. The application is designed with a minimalist, retro black-and-white aesthetic and features a dynamic results display that adapts to the structure of the uploaded invoice.
+
+The entire application runs on the client-side (in the browser), making it fast, private, and easy to deploy without the need for a traditional backend server.
+
+2. Core Architecture
+The application employs a client-side, single-page application (SPA) architecture. This means all logic—from file handling to AI processing—is executed directly within the user's browser.
+
+The workflow is as follows:
+
+File Upload: The user selects an invoice image (JPG or PNG) using a drag-and-drop interface.
+
+In-Browser Conversion: The uploaded image file is converted into a base64-encoded string, a text format suitable for sending via an API.
+
+API Call to AI Model: The base64 image data, along with a sophisticated prompt, is sent to the Google Gemini API.
+
+JSON Response: The Gemini model analyzes the image, extracts the data, and returns a structured JSON object.
+
+Dynamic Rendering: The React frontend receives the JSON response and uses a dynamic component to render the extracted information, creating tables and info sections that match the specific content of the invoice.
+
+This architecture is serverless, enhancing user privacy as the invoice images never leave the user's browser to be stored on a server.
+
+3. Technology Stack
+Frontend Framework: React.js (via Vite) - For building a fast and interactive user interface.
+
+Styling: Manual CSS - All styling is self-contained within the main component for simplicity and to avoid complex configuration. The design is a minimalist black-and-white theme.
+
+File Handling: React Dropzone - A lightweight React hook to create the drag-and-drop zone for file uploads.
+
+AI Model: Google Gemini (gemini-2.0-flash) - A powerful, multimodal Large Language Model that serves as the core intelligence of the application. It performs the visual analysis and data extraction.
+
+4. How the AI Works: Direct LLM-Powered Extraction
+The core of InvoiceAI's intelligence lies in its direct and sophisticated use of the Google Gemini Large Language Model. The application leverages the advanced multimodal capabilities of the LLM to perform a complex analysis of the invoice image in a single, efficient step.
+
+This direct-to-LLM approach is powerful and flexible, allowing the AI to adapt to a wide variety of invoice layouts without being constrained by predefined templates.
+
+The Prompting Strategy
+When the user uploads an image, a detailed prompt is sent to the Gemini API along with the image data. This prompt instructs the AI to perform a series of analytical tasks:
+
+Analyze Top-Level Information: The model is asked to first identify general information from the entire document, such as an Invoice Number, Date, Vendor Name, and any final totals.
+
+Identify the Main Table: It then scans the document to find the primary table containing line items.
+
+Extract Dynamic Headers: The model is critically instructed to extract the exact column headers from that table (e.g., "Product", "Qty", "Unit Price", "Amount").
+
+Extract Row Data: Finally, it extracts the data from each row in the table, ensuring the values correspond to the headers it identified.
+
+Structured JSON Response: The AI is strictly instructed to format its entire output into a single JSON object with two main keys: invoiceInfo (for the top-level data) and lineItems (containing the dynamic headers and rows).
+
+This approach allows the AI to adapt to virtually any table structure without needing a pre-defined template.
+
+The DynamicRenderer Component
+The frontend contains a specialized React component called DynamicRenderer. Its sole purpose is to:
+
+Receive the JSON response from the AI.
+
+Read the invoiceInfo object and display the general information.
+
+Read the lineItems.headers array to dynamically generate the table headers.
+
+Map over the lineItems.rows array to populate the table with the correct data in the correct columns.
+
+This ensures the output always matches the input, providing a truly dynamic and intelligent user experience.
