@@ -2,7 +2,7 @@
 
 InvoiceAI is a modern, responsive web application that uses the power of Google's Gemini AI to automatically extract data from uploaded invoice images. It features a minimalist, retro black-and-white theme and a fully dynamic results display that adapts to the structure of any invoice.
 
-![InvoiceAI Screenshot](<img width="1133" height="839" alt="image" src="https://github.com/user-attachments/assets/a77fa8b2-9486-4cd5-9dc6-e1b3d5048e58" />
+![InvoiceAI Screenshot](![InvoiceAI Screenshot](./public/invoiceAi.jpeg)/>
 ) 
 *(Note: Replace with an actual screenshot of the app)*
 
