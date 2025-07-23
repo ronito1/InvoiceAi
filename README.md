@@ -1,44 +1,70 @@
 # InvoiceAI 📄✨
 
-InvoiceAI is a modern, responsive web application that uses the power of Google's Gemini AI to automatically extract data from uploaded invoice images. It features a minimalist, retro black-and-white theme and a fully dynamic results display that adapts to the structure of any invoice.
+InvoiceAI is a modern web application that showcases the power of Large Language Models for intelligent document processing. By leveraging the multimodal capabilities of **Google's Gemini LLM**, it can analyze any invoice image, understand its unique structure, and dynamically extract its data in a structured format.
+
+The application features a minimalist, retro black-and-white theme and is designed to demonstrate how a sophisticated AI prompt can create a flexible and adaptive data extraction tool.
 
 ![InvoiceAI Screenshot](./public/invoiceAi.jpeg)
 
-) 
-*(Note: Replace with an actual screenshot of the app)*
-
 ---
 
-## 🚀 Key Features
+## 🤖 The AI Core: Dynamic Extraction with Gemini
 
-* **Intelligent Data Extraction:** Upload an image of any invoice, and the AI will extract key information and line items.
-* **Dynamic Results Display:** The output table is generated dynamically based on the actual column headers found in the invoice.
-* **Modern, Minimalist UI:** A clean, responsive, black-and-white retro theme built with self-contained CSS.
-* **Client-Side Processing:** All processing happens in the browser. Your images are never uploaded to a server, ensuring privacy.
-* **Drag-and-Drop Interface:** Easily upload files with a simple and intuitive drag-and-drop zone.
+The intelligence of this application lies in its direct and sophisticated use of the Google Gemini LLM. Unlike rigid template-based systems, InvoiceAI sends the invoice image directly to the model and uses a powerful prompting strategy to perform a complex analysis in a single step.
+
+This approach allows the AI to adapt to a wide variety of invoice layouts—from simple receipts to complex commercial invoices—without being constrained by predefined categories.
+
+### How the Extraction Process Works
+
+1.  **Image Analysis:** When an image is uploaded, it is converted to a base64 string and sent to the Gemini API. The LLM's multimodal capabilities allow it to visually analyze the layout, text, and structure of the document.
+
+2.  **Sophisticated Prompting:** The core of the process is a detailed prompt that guides the LLM's analysis. The prompt instructs the model to act as an expert data extractor and perform the following tasks:
+    * **Extract Top-Level Information:** Identify general invoice data like Invoice Number, Date, Vendor Name, and any final totals. This data is structured into an `invoiceInfo` object.
+    * **Identify the Main Table:** Scan the document to locate the primary table containing line items.
+    * **Dynamically Extract Headers:** Critically, the model is instructed to identify and extract the *exact column headers* from the table (e.g., "Product", "Qty", "Unit Price", "Amount"). This is the key to the app's adaptability.
+    * **Extract Row Data:** The model then processes each row in the table, ensuring the extracted values align with the dynamic headers it just identified.
+
+3.  **Flexible JSON Output:** The AI is strictly instructed to format its entire output into a single, predictable JSON object. This object contains the top-level `invoiceInfo` and a `lineItems` object, which itself holds the dynamic `headers` and `rows` arrays.
+
+    ```json
+    {
+      "invoiceInfo": {
+        "Invoice_Number": "INV-000562",
+        "Date": "11/05/2020",
+        "Total_Value": "$12,512.00"
+      },
+      "lineItems": {
+        "headers": ["Product", "Qty", "Unit Price", "Amount"],
+        "rows": [
+          ["Laser Mouse", "10", "$950.00", "$9,500.00"],
+          ["Dual XL Monitors", "20", "$150.00", "$3,000.00"],
+          ["Multi-jet Printer", "02", "$150.00", "$300.00"]
+        ]
+      }
+    }
+    ```
+
+4.  **Dynamic Frontend Rendering:** A specialized `DynamicRenderer` component in the React frontend receives this JSON. It reads the `headers` array to build the table's header row and then iterates over the `rows` array to populate the table. This ensures that the displayed output is always a perfect representation of the input invoice's structure.
 
 ---
 
 ## 🛠️ Tech Stack
 
-* **Frontend:** [React.js](https://reactjs.org/) (bootstrapped with [Vite](https://vitejs.dev/))
 * **AI Model:** [Google Gemini API](https://ai.google.dev/) (`gemini-2.0-flash`)
+* **Frontend:** [React.js](https://reactjs.org/) (bootstrapped with [Vite](https://vitejs.dev/))
 * **File Uploads:** [React Dropzone](https://react-dropzone.js.org/)
-* **Styling:** Manual CSS (no external libraries like Tailwind CSS)
+* **Styling:** Manual CSS
 
 ---
 
 ## ⚙️ Getting Started
 
-Follow these instructions to get a copy of the project up and running on your local machine.
-
 ### Prerequisites
 
-* [Node.js](https://nodejs.org/) (v18 or later recommended)
-* [npm](https://www.npmjs.com/) (usually comes with Node.js)
-* A **Google AI API Key**. You can get a free key from [Google AI Studio](https://aistudio.google.com/app/apikey).
+* [Node.js](https://nodejs.org/) (v18 or later)
+* A **Google AI API Key**. Get a free key from [Google AI Studio](https://aistudio.google.com/app/apikey).
 
-### Installation
+### Installation & Setup
 
 1.  **Clone the repository:**
     ```bash
@@ -46,39 +72,32 @@ Follow these instructions to get a copy of the project up and running on your lo
     cd invoice-ai
     ```
 
-2.  **Install NPM packages:**
+2.  **Install dependencies:**
     ```bash
     npm install
     ```
 
-3.  **Add your API Key:**
-    * Open the `src/App.jsx` file.
-    * Find the line `const GEMINI_API_KEY = "YOUR_GOOGLE_AI_API_KEY";`.
-    * Replace `"YOUR_GOOGLE_AI_API_KEY"` with your actual API key from Google AI Studio.
+3.  **Configure Environment Variables:**
+    * Create a new file in the root of the project named `.env.local`.
+    * Add your API key to this file (Vite requires the `VITE_` prefix):
+        ```
+        VITE_GEMINI_API_KEY=YOUR_GOOGLE_AI_API_KEY_HERE
+        ```
+    * Update `src/App.jsx` to use this variable:
+        ```javascript
+        const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+        ```
 
-4.  **Run the development server:**
+4.  **Run the app:**
     ```bash
     npm run dev
     ```
 
-The application should now be running on `http://localhost:5173`.
+### Deploying to Vercel
 
----
-
-## 🤖 How It Works
-
-This application uses a powerful prompting technique with the Google Gemini multimodal model to achieve its results without a complex backend.
-
-1.  **Image to Base64:** When you upload an image, it's converted into a base64 string directly in your browser.
-2.  **Dynamic Prompting:** A detailed prompt is sent to the Gemini API along with the image. This prompt instructs the AI to analyze the invoice and return a JSON object containing:
-    * `invoiceInfo`: Top-level data like vendor, date, and totals.
-    * `lineItems`: An object containing two arrays:
-        * `headers`: The actual column headers from the invoice's main table.
-        * `rows`: The data for each row in the table.
-3.  **Dynamic Rendering:** A React component on the frontend, `DynamicRenderer`, reads this flexible JSON structure and builds the results table dynamically, ensuring the output always matches the input's unique layout.
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+1.  Go to your project's settings in Vercel.
+2.  Navigate to the **Environment Variables** section.
+3.  Add a new variable:
+    * **Name:** `VITE_GEMINI_API_KEY`
+    * **Value:** Paste your Google AI API key.
+4.  Redeploy your project.
