@@ -12,7 +12,7 @@ The application features a minimalist, retro black-and-white theme and is design
 
 The intelligence of this application lies in its direct and sophisticated use of the Google Gemini LLM. Unlike rigid template-based systems, InvoiceAI sends the invoice image directly to the model and uses a powerful prompting strategy to perform a complex analysis in a single step.
 
-This approach allows the AI to adapt to a wide variety of invoice layouts—from simple receipts to complex commercial invoices—without being constrained by predefined categories.
+This approach allows the AI to adapt to a wide variety of invoice layouts from simple receipts to complex commercial invoices—without being constrained by predefined categories.
 
 ### How the Extraction Process Works
 
