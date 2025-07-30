@@ -2,9 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 
 // --- Configuration ---
-// IMPORTANT: You need a Google AI API Key to run this locally.
-// 1. Get a free key from Google AI Studio: https://aistudio.google.com/app/apikey
-// 2. Paste your key here:
+// The API Key is securely read from your .env.local file
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
@@ -33,13 +31,87 @@ const manualCSS = `
   .dropzone-content svg { width: 3rem; height: 3rem; color: var(--secondary-color); }
   .dropzone-content p { margin-top: 1rem; font-weight: 600; color: var(--primary-color); }
   .dropzone-content span { margin-top: 0.25rem; font-size: 0.75rem; color: var(--secondary-color); }
-  .main-content { display: grid; gap: 2rem; }
-  @media (min-width: 1024px) { .main-content { grid-template-columns: 2fr 3fr; } }
-  .card { background-color: var(--card-bg); padding: 1.5rem; border-radius: 0.75rem; border: 1px solid var(--border-color); }
-  .card h2 { font-family: var(--font-mono); font-size: 1.25rem; font-weight: 700; margin-top: 0; margin-bottom: 1rem; color: var(--primary-color); }
-  .preview-image-wrapper { width: 100%; border-radius: 0.5rem; overflow: hidden; border: 1px solid var(--border-color); background-color: var(--bg-color); }
-  .preview-image-wrapper img { display: block; width: 100%; height: auto; object-fit: contain; }
-  .controls { margin-top: 1.5rem; display: flex; gap: 1rem; }
+  .main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  @media (min-width: 768px) {
+    .main-content {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+    .preview-column, .card {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+  @media (min-width: 1024px) {
+    .main-content {
+      gap: 2.5rem;
+    }
+    .preview-column {
+      max-width: 380px;
+      flex: 2 1 0%;
+    }
+    .card {
+      flex: 3 1 0%;
+    }
+  }
+  .card {
+    background-color: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .card h2 {
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+  }
+  .preview-image-wrapper {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 180px;
+  }
+  .preview-image-wrapper img {
+    display: block;
+    width: 100%;
+    max-width: 350px;
+    height: auto;
+    object-fit: contain;
+    margin: 0 auto;
+  }
+  @media (max-width: 480px) {
+    .preview-image-wrapper img {
+      max-width: 100%;
+    }
+  }
+  .controls {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  @media (min-width: 480px) {
+    .controls {
+      flex-direction: row;
+      gap: 1rem;
+    }
+  }
   .btn { flex-grow: 1; font-weight: 700; padding: 0.75rem 1.5rem; border-radius: 0.5rem; border: none; cursor: pointer; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; }
   .btn-primary { background-color: var(--primary-color); color: var(--bg-color); }
   .btn-primary:hover { background-color: #cccccc; }
@@ -54,12 +126,60 @@ const manualCSS = `
   .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
   .info-item p { margin: 0; }
   .info-item strong { color: var(--secondary-color); font-weight: normal; }
-  .items-table-wrapper { overflow-x: auto; }
-  .items-table { width: 100%; border-collapse: collapse; }
-  .items-table th, .items-table td { padding: 0.75rem; text-align: left; font-family: var(--font-mono); font-size: 0.875rem; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
-  .items-table th { color: var(--secondary-color); font-weight: normal; text-transform: uppercase; }
-  .items-table tr:last-child td { border-bottom: none; }
+  .items-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 1rem;
+  }
+  .items-table {
+    width: 100%;
+    min-width: 480px;
+    border-collapse: collapse;
+    background: transparent;
+  }
+  .items-table th, .items-table td {
+    padding: 0.75rem 0.5rem;
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+    background: transparent;
+  }
+  .items-table th {
+    color: var(--secondary-color);
+    font-weight: normal;
+    text-transform: uppercase;
+    background: var(--card-bg);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  .items-table tr:last-child td {
+    border-bottom: none;
+  }
+  @media (max-width: 600px) {
+    .items-table {
+      font-size: 0.8rem;
+      min-width: 360px;
+    }
+    .items-table th, .items-table td {
+      padding: 0.5rem 0.25rem;
+    }
+  }
   .app-footer { text-align: center; margin-top: 4rem; color: #666; font-size: 0.875rem; }
+  .quotation-box {
+    background-color: var(--hover-bg);
+    border-left: 4px solid var(--primary-color);
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+    font-style: italic;
+    color: var(--secondary-color);
+  }
+  .quotation-box p {
+    margin: 0;
+  }
 `;
 
 // Helper function to convert a file to a base64 string
@@ -76,7 +196,7 @@ const Spinner = () => ( <div style={{width: '2rem', height: '2rem', borderRadius
 
 // --- NEW: Fully Dynamic Renderer Component ---
 const DynamicRenderer = ({ response }) => {
-    const { invoiceInfo, lineItems } = response;
+    const { invoiceInfo, lineItems, summary } = response;
 
     if (!invoiceInfo || !lineItems) {
         return <p>Could not process invoice data into a standard format.</p>;
@@ -84,6 +204,12 @@ const DynamicRenderer = ({ response }) => {
 
     return (
         <div>
+            {summary && (
+                <div className="quotation-box">
+                    <p>{summary}</p>
+                </div>
+            )}
+
             <div className="data-section">
                 <h3>Invoice Information</h3>
                 <div className="info-grid">
@@ -147,7 +273,7 @@ export default function App() {
 
   const handleProcessInvoice = async () => {
     if (!file) { setError("Please upload a file first."); return; }
-    if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GOOGLE_AI_API_KEY") { setError("Please add your Google AI API Key."); return; }
+    if (!GEMINI_API_KEY) { setError("Your Google AI API Key is missing. Please add it to your .env.local file."); return; }
     setLoading(true);
     setError(null);
     setExtractedData(null);
@@ -163,8 +289,9 @@ export default function App() {
                 2.  Identify the main table of line items.
                 3.  Extract the exact column headers of this table into a JSON array called "headers".
                 4.  Extract each row of data from the table into a JSON array of arrays called "rows". Each inner array should correspond to a row, with values in the same order as the headers.
+                5.  After extracting the data, provide a brief, one-sentence textual summary of the invoice. Put this into a string called "summary".
                 
-                Finally, respond with a single JSON object containing two top-level keys: "invoiceInfo" and "lineItems" (which contains the "headers" and "rows").
+                Finally, respond with a single JSON object containing three top-level keys: "invoiceInfo", "lineItems" (which contains "headers" and "rows"), and "summary".
                 IMPORTANT: Your entire response must be ONLY the JSON object itself. Do not include conversational text or markdown.
               `},
               { inline_data: { mime_type: file.type, data: base64ImageData } }
@@ -248,7 +375,6 @@ export default function App() {
                 <h2>Extracted Data</h2>
                 {loading && ( <div className="results-loader"><Spinner /><p>Analyzing with Gemini...</p></div> )}
                 
-                {/* --- Use the new DynamicRenderer --- */}
                 {extractedData && <DynamicRenderer response={extractedData} />}
 
                 {!loading && !extractedData && ( <div className="results-placeholder"><p>Analysis results will appear here.</p></div> )}
